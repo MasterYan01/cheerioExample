@@ -5,10 +5,7 @@ let lastData = {}; // 儲存每個網站的 HTML 資料
 
 async function fetchNewsTitles(chalk) {
     const urls = [
-        { url: 'https://tw.news.yahoo.com/politics/', label: '政治新聞' },
-        { url: 'https://tw.news.yahoo.com/finance/', label: '財經新聞' }
-        // { url: 'https://tw.news.yahoo.com/economy/', label: '經濟新聞' },
-        // { url: 'https://tw.news.yahoo.com/sports/', label: '體育新聞' }
+        { url: 'https://news.google.com/topics/CAAqKggKIiRDQkFTRlFvSUwyMHZNRGx6TVdZU0JYcG9MVlJYR2dKVVZ5Z0FQAQ?hl=zh-TW&gl=TW&ceid=TW%3Azh-Hant', label: '財經新聞' }
     ];
 
     try {
@@ -30,12 +27,13 @@ async function fetchNewsTitles(chalk) {
 
             // 選擇要提取的元素（這裡我們選擇新聞標題）
             const titles = [];
-            $('.Cf').each((index, element) => {
-                let title = $(element).find('h3').text().trim();
+            // 假設標題的選擇器是 '.xrnccd .nuEeue' (這是根據實際網站的 HTML 結構來調整的)
+            $('.xrnccd .nuEeue').each((index, element) => {
+                let title = $(element).find('a').text().trim();
                 // 將「柯文哲」和「台積電」字樣用紅色顯示
                 title = title
                     .replace(/柯文哲/g, (match) => chalk.red(match))
-                    // .replace(/台積電/g, (match) => chalk.red(match));
+                    .replace(/台積電/g, (match) => chalk.red(match));
                 titles.push(title);
             });
 
@@ -59,4 +57,3 @@ async function fetchNewsTitles(chalk) {
     // 每 5 分鐘（300000 毫秒）檢查一次資料
     setInterval(() => fetchNewsTitles(chalk), 300000);
 })();
-
