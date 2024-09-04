@@ -83,7 +83,7 @@ async function fetchNewsTitles(chalk) {
 
             // 顯示鴻海新聞標題及縮短後的連結
             console.log(chalk.yellow('鴻海新聞標題:'));
-            foxconnNews.forEach((news, index) => {
+            foxconnNews.slice(0,10).forEach((news, index) => {
                 console.log(`${index + 1}. ${news.title}`);
                 if (news.link) {
                     console.log(`   連結: ${news.link}`);
