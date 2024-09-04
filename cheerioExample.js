@@ -1,5 +1,6 @@
 const axios = require('axios');
 const cheerio = require('cheerio');
+const TinyURL = require('tinyurl');
 const highlightKeywords = require('./highlightKeywords'); // 導入 highlightKeywords 函數
 
 let lastYahooData = ''; // 儲存上次抓取的 Yahoo Finance HTML 資料
@@ -23,8 +24,6 @@ async function fetchNewsTitles(chalk) {
                 yahooTitles.push(title);
             });
 
-            // 清除終端機中的舊資料並顯示 Yahoo Finance 新聞標題
-            console.clear();
             console.log(chalk.yellow('Yahoo Finance 新聞標題:'));
             yahooTitles.forEach((title, index) => {
                 console.log(`${index + 1}. ${title}`);
@@ -62,18 +61,33 @@ async function fetchNewsTitles(chalk) {
         if (foxconnData !== lastFoxconnData) {
             lastFoxconnData = foxconnData;
             const $ = cheerio.load(foxconnData);
-            const foxconnTitles = [];
+            const foxconnNews = [];
 
+            // 用 Promise.all 處理所有連結的縮短
+            const promises = [];
             $('.Cf').each((index, element) => {
-                let title = $(element).find('h3').text().trim();
-                title = highlightKeywords(title, chalk);
-                foxconnTitles.push(title);
+                const titleElement = $(element).find('h3');
+                const title = titleElement.text().trim();
+                const link = $(element).find('a').attr('href');
+
+                // 添加連結縮短的 Promise
+                if (link) {
+                    promises.push(TinyURL.shorten(link).then(shortLink => {
+                        foxconnNews.push({ title: highlightKeywords(title, chalk), link: shortLink });
+                    }));
+                }
             });
 
-            // 顯示鴻海新聞標題
+            // 等待所有連結縮短完成
+            await Promise.all(promises);
+
+            // 顯示鴻海新聞標題及縮短後的連結
             console.log(chalk.yellow('鴻海新聞標題:'));
-            foxconnTitles.forEach((title, index) => {
-                console.log(`${index + 1}. ${title}`);
+            foxconnNews.forEach((news, index) => {
+                console.log(`${index + 1}. ${news.title}`);
+                if (news.link) {
+                    console.log(`   連結: ${news.link}`);
+                }
                 console.log(''); // 插入空行以模擬行距
             });
         }
@@ -87,3 +101,4 @@ async function fetchNewsTitles(chalk) {
     await fetchNewsTitles(chalk);
     setInterval(() => fetchNewsTitles(chalk), 300000);
 })();
+
