@@ -7,7 +7,8 @@ function highlightKeywords(title, chalk) {
       .replace(/AI/g, (match) => chalk.yellow(match))
       .replace(/廣達/g, (match) => chalk.green(match))
       .replace(/緯創/g, (match) => chalk.green(match))
-      .replace(/輝達/g, (match) => chalk.green(match));
+      .replace(/輝達/g, (match) => chalk.green(match))
+      .replace(/Nvidia/g, (match) => chalk.green(match));
 }
 
 module.exports = highlightKeywords;
