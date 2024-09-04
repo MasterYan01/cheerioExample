@@ -2,8 +2,9 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const highlightKeywords = require('./highlightKeywords'); // 導入 highlightKeywords 函數
 
-let lastYahooData = ''; // 儲存上次抓取的 Yahoo HTML 資料
+let lastYahooData = ''; // 儲存上次抓取的 Yahoo Finance HTML 資料
 let lastGoogleData = ''; // 儲存上次抓取的 Google Finance HTML 資料
+let lastFoxconnData = ''; // 儲存上次抓取的鴻海新聞 HTML 資料
 
 async function fetchNewsTitles(chalk) {
     try {
@@ -46,9 +47,32 @@ async function fetchNewsTitles(chalk) {
                 googleTitles.push(title);
             });
 
-            // 清除終端機中的舊資料並顯示 Google Finance 新聞標題
+            // 顯示 Google Finance 新聞標題
             console.log(chalk.yellow('Google Finance 新聞標題:'));
             googleTitles.forEach((title, index) => {
+                console.log(`${index + 1}. ${title}`);
+                console.log(''); // 插入空行以模擬行距
+            });
+        }
+
+        // 抓取鴻海（2317.TW）的新聞標題
+        const foxconnResponse = await axios.get('https://tw.stock.yahoo.com/quote/2317.TW');
+        const foxconnData = foxconnResponse.data;
+
+        if (foxconnData !== lastFoxconnData) {
+            lastFoxconnData = foxconnData;
+            const $ = cheerio.load(foxconnData);
+            const foxconnTitles = [];
+
+            $('.Cf').each((index, element) => {
+                let title = $(element).find('h3').text().trim();
+                title = highlightKeywords(title, chalk);
+                foxconnTitles.push(title);
+            });
+
+            // 顯示鴻海新聞標題
+            console.log(chalk.yellow('鴻海新聞標題:'));
+            foxconnTitles.forEach((title, index) => {
                 console.log(`${index + 1}. ${title}`);
                 console.log(''); // 插入空行以模擬行距
             });
